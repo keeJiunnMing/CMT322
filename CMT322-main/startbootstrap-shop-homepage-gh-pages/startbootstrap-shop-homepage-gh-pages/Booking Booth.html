@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Bar with Image Display</title>
+    <style>
+        /* Basic Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Layout */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #000; /* Set background color to black */
+            color: white; /* Ensure text is visible on the black background */
+        }
+        /* Horizontal Navigation Bar */
+        .horizontal-navbar {
+            width: 100%;
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            z-index: 999;
+        }
+
+        .horizontal-navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 15px 25px;
+            font-size: 16px;
+        }
+
+        .horizontal-navbar a:hover {
+            background-color: #555;
+        }
+
+        /* Button to hide horizontal navigation bar */
+        .hide-horizontal-btn {
+            padding: 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 20px;
+        }
+
+        .hide-horizontal-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Navigation bar styling */
+        .navbar {
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Profile container inside navbar */
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px; /* Space between profile and title */
+        }
+
+        .profile-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #ddd;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .username {
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .navbar h2 {
+            margin-bottom: 20px;
+        }
+
+        .nav-item {
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #444;
+            margin: 5px 0;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background-color: #555;
+        }
+
+        /* Image display area */
+        .content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000; /* Set background color to black */
+            position: relative; /* Reference for positioning child elements */
+        }
+
+        .content img {
+            width: 100%; /* Fill the space */
+            height: 100%;
+            object-fit: cover; /* Make the image fill the container while maintaining the aspect ratio */
+            display: none;
+        }
+
+        /* Image display */
+        .content img.active {
+            display: block;
+        }
+
+        /* Styling for booths (rectangles) */
+        .booth {
+            position: absolute;
+            background-color: red; /* Solid red color */
+            border: 2px solid black; /* Black border */
+            display: none; /* Hide booths by default */
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            line-height: 30px;
+        }
+
+        /* Information display */
+        .booth-info {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            display: none;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            max-width: 250px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .booth-info.minimized {
+            height: 30px;
+            overflow: hidden;
+        }
+
+        .booth-info .table-wrapper {
+            display: block;
+        }
+
+        .booking-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .booking-table th, .booking-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+
+        .booking-table th {
+            background-color: #444;
+        }
+
+        .booking-table td {
+            background-color: #222;
+        }
+
+        /* Button styling */
+        .booking-btn, .cancel-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .booking-btn:disabled, .cancel-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Optional: Focus effect for accessibility */
+        .booking-btn:focus, .cancel-btn:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 128, 0, 0.7);
+        }
+
+        .booking-btn:hover, .cancel-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Minimize and Close buttons */
+        .btn-minimize, .btn-close, .btn-fullscreen {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .btn-minimize:hover, .btn-close:hover, .btn-fullscreen:hover {
+            color: red;
+        }
+
+        /* Full screen style */
+        .booth-info.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            max-height: none;
+            bottom: 0;
+            right: 0;
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <!-- Profile section above the navigation title -->
+        <div class="profile-container">
+            <div class="profile-icon">
+                <img src="C:\Users\USER\Downloads\CMT322-main\CMT322-main\Image\download (31).jpg" alt="Profile Image" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+            </div>
+            <div class="username">
+                Group 1 Leader
+            </div>
+        </div>
+
+        <h2>Navigation</h2>
+        <a href="#" class="nav-item" onclick="showImage('hazmat')">Hazmat Sedut</a>
+        <a href="#" class="nav-item" onclick="showImage('library')">Library Sedut 1</a>
+        <a href="#" class="nav-item" onclick="showImage('dtsp')">DTSP</a>
+        <a href="#" class="nav-item" onclick="showImage('lecturer')">Lecturer G-R</a>
+    </div>
+
+    
+    <!-- Image Display Area -->
+    <div class="content">
+        <!-- Hazmat Sedut Map -->
+        <img id="hazmat" src="C:\Users\USER\Downloads\CMT322-main\CMT322-main\Image\Screenshot (3232).png" alt="Hazmat Sedut">
+        <!-- Library Sedut 1 Map -->
+        <img id="library" src="C:\Users\USER\Downloads\CMT322-main\CMT322-main\Image\Screenshot (3231).png" alt="Library Sedut 1">
+        <!-- DTSP Map -->
+        <img id="dtsp" src="C:\Users\USER\Downloads\CMT322-main\CMT322-main\Image\Screenshot (3232).png" alt="DTSP">
+        <!-- Lecturer G-R Map -->
+        <img id="lecturer" src="path/to/your/image4.png" alt="Lecturer G-R">
+
+        <!-- Booths (rectangles) for Hazmat Sedut -->
+        <div id="hazmat-booth1" class="booth" style="top: 20%; left: 40%; width: 10%; height: 10%;" onclick="showBoothInfo('booth1')">
+            Booth 1
+        </div>
+        <div id="hazmat-booth2" class="booth" style="top: 40%; left: 30%; width: 12%; height: 8%;" onclick="showBoothInfo('booth2')">
+            Booth 2
+        </div>
+        <div id="hazmat-booth3" class="booth" style="top: 60%; left: 20%; width: 8%; height: 12%;" onclick="showBoothInfo('booth3')">
+            Booth 3
+        </div>
+
+        <!-- Booths (rectangles) for Library Sedut 1 -->
+        <div id="library-booth4" class="booth" style="top: 10%; left: 50%; width: 8%; height: 8%;" onclick="showBoothInfo('booth4')">
+            Booth 4
+        </div>
+        <div id="library-booth5" class="booth" style="top: 60%; left: 10%; width: 12%; height: 10%;" onclick="showBoothInfo('booth5')">
+            Booth 5
+        </div>
+
+       <!-- Booth Information -->
+       <div id="booth1-info" class="booth-info">
+        <button class="btn-minimize" onclick="toggleMinimize('booth1')">_</button>
+        <button class="btn-fullscreen" onclick="toggleFullscreen('booth1')">[ ]</button>
+        <button class="btn-close" onclick="closeBoothInfo('booth1')">X</button>
+        <table class="booking-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Group Number</th> 
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button class="cancel-btn" onclick="cancelBooking('booth1')">Cancel Booking</button>
+        <button class="booking-btn" onclick="bookBooth('booth1')">Book This Booth</button>
+    </div>
+    
+    <div id="booth2-info" class="booth-info">
+        <button class="btn-minimize" onclick="toggleMinimize('booth2')">_</button>
+        <button class="btn-fullscreen" onclick="toggleFullscreen('booth2')">[ ]</button>
+        <button class="btn-close" onclick="closeBoothInfo('booth2')">X</button>
+        <table class="booking-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Group Number</th> 
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button class="cancel-btn" onclick="cancelBooking('booth2')">Cancel Booking</button>
+        <button class="booking-btn" onclick="bookBooth('booth2')">Book This Booth</button>
+    </div>
+    
+    <div id="booth3-info" class="booth-info">
+        <button class="btn-minimize" onclick="toggleMinimize('booth3')">_</button>
+        <button class="btn-fullscreen" onclick="toggleFullscreen('booth3')">[ ]</button>
+        <button class="btn-close" onclick="closeBoothInfo('booth3')">X</button>
+        <table class="booking-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Group Number</th> 
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button class="cancel-btn" onclick="cancelBooking('booth3')">Cancel Booking</button>
+        <button class="booking-btn" onclick="bookBooth('booth3')">Book This Booth</button>
+    </div>
+    
+    <div id="booth4-info" class="booth-info">
+        <button class="btn-minimize" onclick="toggleMinimize('booth4')">_</button>
+        <button class="btn-fullscreen" onclick="toggleFullscreen('booth4')">[ ]</button>
+        <button class="btn-close" onclick="closeBoothInfo('booth4')">X</button>
+        <table class="booking-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Group Number</th> 
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button class="cancel-btn" onclick="cancelBooking('booth4')">Cancel Booking</button>
+        <button class="booking-btn" onclick="bookBooth('booth4')">Book This Booth</button>
+    </div>
+    
+    <div id="booth5-info" class="booth-info">
+        <button class="btn-minimize" onclick="toggleMinimize('booth5')">_</button>
+        <button class="btn-fullscreen" onclick="toggleFullscreen('booth5')">[ ]</button>
+         <button class="btn-close" onclick="closeBoothInfo('booth5')">X</button>
+        <table class="booking-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Group Number</th> 
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button class="cancel-btn" onclick="cancelBooking('booth5')">Cancel Booking</button>
+        <button class="booking-btn" onclick="bookBooth('booth5')">Book This Booth</button>
+    </div>
+    
+
+    <script>
+        
+    // This object will store the booking status for each booth on each date
+    let boothBookings = {
+        booth1: {
+            '2024-11-09': null,
+            '2024-11-10': null
+        },
+        booth2: {
+            '2024-11-09': null,
+            '2024-11-10': null
+        },
+        booth3: {
+            '2024-11-09': null,
+            '2024-11-10': null
+        },
+        booth4: {
+            '2024-11-09': null,
+            '2024-11-10': null
+        },
+        booth5: {
+            '2024-11-09': null,
+            '2024-11-10': null
+        }
+    };
+
+    // Function to generate a random group name
+    function generateRandomGroup() {
+        const groups = ['Group A', 'Group B', 'Group C', 'Group D', 'Group E'];
+        return groups[Math.floor(Math.random() * groups.length)];
+    }
+ 
+    let bookingCount = 0; // Tracks the total successful bookings by the user
+
+// Function to handle booking
+function bookBooth(boothId) {
+    const today = new Date().toISOString().split('T')[0]; // Dynamic date
+    const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]; // Dynamic tomorrow date
+
+    // Check if the user has already booked a booth
+    if (bookingCount >= 1) {
+        alert("You have already booked a booth. Multiple bookings are not allowed.");
+        return;
+    }
+
+    // Check if the booth is already booked for today or tomorrow
+  //  if (boothBookings[boothId][today] || boothBookings[boothId][tomorrow]) {
+  //      alert("This booth is already booked.");
+  //      return;
+  //  }
+
+    const randomGroup = generateRandomGroup();
+    boothBookings[boothId][today] = randomGroup;
+    boothBookings[boothId][tomorrow] = randomGroup;
+
+    const boothInfo = document.getElementById(boothId + '-info');
+    const bookingTable = boothInfo.querySelector('.booking-table tbody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `<td>${today}</td><td>${randomGroup}</td>`;
+    bookingTable.appendChild(newRow);
+
+    boothInfo.querySelector('.booking-btn').disabled = true;
+
+    bookingCount++; // Increase booking count
+    disableAllBooths();
+    alert("Booking successful! Group: " + randomGroup);
+}
+// Disable all booth booking buttons
+function disableAllBooths() {
+    const booths = document.querySelectorAll('.booth-info');
+    booths.forEach(booth => {
+        const bookingBtn = booth.querySelector('.booking-btn');
+        if (!bookingBtn.disabled) {
+            bookingBtn.disabled = true; // Disable the booking button
+        }
+    });
+}
+// Function to handle canceling booking
+function cancelBooking(boothId) {
+    const boothInfo = document.getElementById(boothId + '-info');
+    const bookingTable = boothInfo.querySelector('.booking-table tbody');
+
+    const rows = bookingTable.querySelectorAll('tr');
+    if (rows.length === 0) {
+        alert("No bookings to cancel for this booth.");
+        return;
+    }
+
+    const lastRow = rows[rows.length - 1];
+    const date = lastRow.cells[0].textContent;
+    const today = new Date().toISOString().split('T')[0];
+
+    if (date !== today) {
+        alert("You can only cancel the latest booking for today's date.");
+        return;
+    }
+
+    bookingTable.removeChild(lastRow);
+    boothBookings[boothId][date] = null;
+
+    boothInfo.querySelector('.booking-btn').disabled = false;
+
+    bookingCount--; // Decrease booking count to allow rebooking
+    alert("Booking canceled for " + date);
+    enableAllBooths();
+}
+// Enable all booth booking buttons
+function enableAllBooths() {
+    const booths = document.querySelectorAll('.booth-info');
+    booths.forEach(booth => {
+        const bookingBtn = booth.querySelector('.booking-btn');
+        if (bookingBtn.disabled) {
+            bookingBtn.disabled = false; // Enable the booking button
+        }
+    });
+}
+    // This function will show the booth information when clicked
+    function showBoothInfo(boothId) {
+        // Hide all booth info
+        document.querySelectorAll('.booth-info').forEach(info => {
+            info.style.display = 'none';
+        });
+
+        // Show the selected booth info
+        document.getElementById(boothId + '-info').style.display = 'block';
+
+        // Check if the booth is already booked and disable the booking button
+        const boothInfo = document.getElementById(boothId + '-info');
+        const bookingButton = boothInfo.querySelector('.booking-btn');
+        const today = '2024-11-09'; // Update based on current date logic
+
+        if (boothBookings[boothId][today] || boothBookings[boothId]['2024-11-10']) {
+            bookingButton.disabled = true;
+        } else {
+            bookingButton.disabled = false;
+        }
+    }
+
+    // Additional functions to minimize, close, and toggle fullscreen
+    function toggleMinimize(boothId) {
+        var boothInfo = document.getElementById(boothId + '-info');
+        boothInfo.classList.toggle('minimized');
+    }
+
+    function closeBoothInfo(boothId) {
+        var boothInfo = document.getElementById(boothId + '-info');
+        boothInfo.style.display = 'none';
+    }
+
+    function toggleFullscreen(boothId) {
+        var boothInfo = document.getElementById(boothId + '-info');
+        boothInfo.classList.toggle('fullscreen');
+    }
+
+        function showImage(imageId) {
+            // Hide all images
+            document.querySelectorAll('.content img').forEach(img => {
+                img.classList.remove('active');
+            });
+
+            // Show the selected image
+            document.getElementById(imageId).classList.add('active');
+
+            // Hide all booths and booth information initially
+            document.querySelectorAll('.booth').forEach(booth => {
+                booth.style.display = 'none';
+            });
+            document.querySelectorAll('.booth-info').forEach(info => {
+                info.style.display = 'none';
+            });
+
+            // Display booths for the selected image
+            if (imageId === 'hazmat') {
+                document.getElementById('hazmat-booth1').style.display = 'block';
+                document.getElementById('hazmat-booth2').style.display = 'block';
+                document.getElementById('hazmat-booth3').style.display = 'block';
+            } else if (imageId === 'library') {
+                document.getElementById('library-booth4').style.display = 'block';
+                document.getElementById('library-booth5').style.display = 'block';
+            } else if (imageId === 'dtsp') {
+                document.getElementById('dtsp-booth1').style.display = 'block';
+                document.getElementById('dtsp-booth2').style.display = 'block';
+            }
+        }
+
+        // Show booth information when clicked
+        function showBoothInfo(boothId) {
+            // Hide all booth info
+            document.querySelectorAll('.booth-info').forEach(info => {
+                info.style.display = 'none';
+            });
+
+            // Show the selected booth info
+            document.getElementById(boothId + '-info').style.display = 'block';
+        }
+
+        // Minimize booth info
+        function toggleMinimize(boothId) {
+            var boothInfo = document.getElementById(boothId + '-info');
+            boothInfo.classList.toggle('minimized');
+        }
+
+        // Close booth info
+        function closeBoothInfo(boothId) {
+            var boothInfo = document.getElementById(boothId + '-info');
+            boothInfo.style.display = 'none';
+        }
+
+        // Fullscreen booth info
+        function toggleFullscreen(boothId) {
+            var boothInfo = document.getElementById(boothId + '-info');
+            boothInfo.classList.toggle('fullscreen');
+        }
+    </script>
+
+</body>
+</html>
