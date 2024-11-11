@@ -70,7 +70,20 @@
             flex-direction: column;
             align-items: center;
         }
+        .return-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: auto; /* Push the button to the bottom */
+    width: 100%;
+}
 
+.return-btn:hover {
+    background-color: #d32f2f;
+}
         /* Profile container inside navbar */
         .profile-container {
             display: flex;
@@ -135,16 +148,26 @@
         }
 
         /* Styling for booths (rectangles) */
-        .booth {
+      /*  .booth {
             position: absolute;
             background-color: red; /* Solid red color */
-            border: 2px solid black; /* Black border */
-            display: none; /* Hide booths by default */
-            text-align: center;
+           /* border: 2px solid black; /* Black border */
+           /* display: none; /* Hide booths by default */
+          /*  text-align: center;
             color: white;
             font-weight: bold;
             line-height: 30px;
-        }
+        } 
+        /* Styling for booths (rectangles) */
+.booth {
+    display: none;
+    position: absolute;
+    background-color: red; /* Solid red color */
+    border: 4px solid black; /* Black border, thicker for better visibility */
+    width: 12%; /* Adjust width based on the desired booth size */
+    height: 6%; /* Adjust height for a rectangular shape */
+}
+
 
         /* Information display */
         .booth-info {
@@ -263,6 +286,8 @@
         <a href="#" class="nav-item" onclick="showImage('library')">Library Sedut 1</a>
         <a href="#" class="nav-item" onclick="showImage('dtsp')">DTSP</a>
         <a href="#" class="nav-item" onclick="showImage('lecturer')">Lecturer G-R</a>
+        <!-- Return Button at the bottom -->
+        <button class="return-btn" onclick="goBack()">Return</button>
     </div>
 
     
@@ -275,7 +300,7 @@
         <!-- DTSP Map -->
         <img id="dtsp" src="C:\Users\USER\Downloads\CMT322-main\CMT322-main\Image\Screenshot (3232).png" alt="DTSP">
         <!-- Lecturer G-R Map -->
-        <img id="lecturer" src="path/to/your/image4.png" alt="Lecturer G-R">
+        <img id="lecturer" src="C:\Users\USER\Downloads\CMT322-main\CMT322-main\Image\Screenshot (3230).png" alt="Lecturer G-R">
 
         <!-- Booths (rectangles) for Hazmat Sedut -->
         <div id="hazmat-booth1" class="booth" style="top: 20%; left: 40%; width: 10%; height: 10%;" onclick="showBoothInfo('booth1')">
@@ -601,6 +626,42 @@ function enableAllBooths() {
             var boothInfo = document.getElementById(boothId + '-info');
             boothInfo.classList.toggle('fullscreen');
         }
+        // Function to simulate navigation back to the main page
+        function goBack() {
+            window.location.href = 'index.html'; // Change to the actual main page URL
+        }
+
+        function showImage(imageId) {
+    // Hide all images
+    document.querySelectorAll('.content img').forEach(img => {
+        img.classList.remove('active');
+    });
+
+    // Show the selected image
+    const activeImage = document.getElementById(imageId);
+    if (activeImage) {
+        activeImage.classList.add('active');
+    }
+
+    // Hide all booths
+    document.querySelectorAll('.booth').forEach(booth => {
+        booth.style.display = 'none';
+    });
+
+    // Show booths based on selected image
+    if (imageId === 'hazmat') {
+        document.getElementById('hazmat-booth1').style.display = 'block';
+        document.getElementById('hazmat-booth2').style.display = 'block';
+        document.getElementById('hazmat-booth3').style.display = 'block';
+    } else if (imageId === 'library') {
+        document.getElementById('library-booth4').style.display = 'block';
+        document.getElementById('library-booth5').style.display = 'block';
+    } else if (imageId === 'dtsp') {
+        document.getElementById('dtsp-booth1').style.display = 'block';
+        document.getElementById('dtsp-booth2').style.display = 'block';
+    }
+}
+
     </script>
 
 </body>
